@@ -7,6 +7,7 @@ import Panel from 'react-bootstrap/lib/Panel';
 import Input from 'react-bootstrap/lib/Input';
 import Label from 'react-bootstrap/lib/Label';
 import Button from 'react-bootstrap/lib/Button';
+import axios from 'axios'
 
 class LunchApp extends React.Component {
   render() {
@@ -28,11 +29,30 @@ class LunchOptionsPanel extends React.Component {
     super(props);
     this.state = {selectedLunch: 'Nothing selected'};
     this.handleClick = this.handleClick.bind(this);
+    this.onLunchSelected = this.onLunchSelected.bind(this);
+  }
+  onLunchSelected(name, instructions) {
+    this.saveLunchSelection(name, this.state.selectedLunch, instructions);
   }
   handleClick(event) {
     // may need to use innerText for older IE
     this.setState({
       selectedLunch: event.target.textContent
+    });
+  }
+  saveLunchSelection(name, lunch, instructions) {
+    console.log('Saving ', name, lunch, instructions);
+    axios.post('/lunches', {
+      name: name,
+      lunch: lunch,
+      instructions: instructions
+    })
+    .then(function (response) {
+      // success(response);
+      console.log(response);
+    })
+    .catch(function (response) {
+      // error(response);
     });
   }
   render() {
@@ -45,11 +65,52 @@ class LunchOptionsPanel extends React.Component {
         <Panel header="Please select one" bsStyle="info">
           {lunchOptions}
         </Panel>
-        <SelectedLunchPanel  selectedLunch={this.state.selectedLunch}></SelectedLunchPanel>
+        <SelectedLunchPanel
+           selectedLunch={this.state.selectedLunch}
+           onUpdate={this.onLunchSelected}/>
+        <AllLunchOrdersPanel/>
       </div>
     );
   }
 }
+
+class AllLunchOrdersPanel extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {lunches: []};
+    this.getLunchOrders = this.getLunchOrders.bind(this);
+  }
+  getLunchOrders() {
+    let _this = this;
+    axios.get('/lunches')
+    .then(function (response) {
+      _this.setState({
+        lunches: response.data
+      });
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+  }
+  render() {
+    let lunchOrders = this.state.lunches.map(function(lunch, idx) {
+      return (
+        <p key={idx}>
+          Guest {lunch.name} ordered {lunch.lunch} with instructions {lunch.instructions}
+        </p>
+      );
+    });
+
+    return (
+      <div>
+        <Button onClick={this.getLunchOrders}>Get Lunch Orders</Button>
+        <Panel header="Lunch Orders" bsStyle="info">
+          {lunchOrders}
+        </Panel>
+      </div>
+    )
+  }
+ }
 
 class SelectedLunchPanel extends React.Component {
   constructor(props) {
@@ -57,8 +118,11 @@ class SelectedLunchPanel extends React.Component {
     this.updateInstructions = this.updateInstructions.bind(this);
     this.state = { instructions: '' };
   }
-  updateInstructions(instructions) {
-    this.setState({instructions: instructions});
+  updateInstructions(instructions, guestName) {
+    this.setState({
+      instructions: instructions
+    });
+    this.props.onUpdate(guestName, instructions);
   }
   render() {
     return (
@@ -82,17 +146,22 @@ class SpecialInstructionsInput extends React.Component {
     this.handleChange = this.handleChange.bind(this);
   }
   handleChange() {
-    this.props.updateInstructions(this.refs.specialInstructionsInput.value);
+    this.props.updateInstructions(
+      this.refs.specialInstructionsInput.value,
+      this.refs.guestName.value);
   }
   render() {
     return (
       <div>
-        <Label>Enter special instructions:</Label>
-      <input
-        ref='specialInstructionsInput'
-        type='text'
-         />
-       <Button onClick={this.handleChange}>Submit</Button>
+        <div>
+          <Label>Guest name:</Label>
+          <input ref='guestName' type='text'/>
+        </div>
+        <div>
+          <Label>Instructions:</Label>
+          <input ref='specialInstructionsInput' type='text'/>
+        </div>
+        <Button onClick={this.handleChange}>Submit</Button>
       </div>
     );
   }

@@ -53,18 +53,46 @@ class LunchOptionsPanel extends React.Component {
 class SelectedLunchPanel extends React.Component {
   constructor(props) {
     super(props);
-    this.updateInstructions = this.updateInstructions.bind(this);
+    this._updateInstructions = this._updateInstructions.bind(this);
     this.state = { instructions: '' };
+  }
+  _updateInstructions(instructions) {
+    this.setState({instructions: instructions});
+  }
+  componentWillUpdate(nextProps, nextState) {
+    if (this.props.selectedLunch !== nextProps.selectedLunc) {
+      // this.state.instructions = 'Enter instructions';
+    }
   }
   render() {
     return (
       <div>
         <Panel header="You've picked" bsStyle="warning">
           <Label>{this.props.selectedLunch}</Label>
-          <p>Special Instructions: </p>
+          <p>Special Instructions: {this.state.instructions}</p>
+          <SpecialInstructionsInput
+            value={this.state.instructions}
+            onUpdate={this._updateInstructions}/>
         </Panel>
       </div>
     );
+  }
+}
+
+class SpecialInstructionsInput extends React.Component {
+  constructor(props) {
+    super(props);
+    this._handleChange = this._handleChange.bind(this);
+  }
+  _handleChange(event) {
+    this.props.onUpdate(event.target.value);
+  }
+  render() {
+    return (
+      <input type="text" placeholder={this.props.value}
+             onChange={this._handleChange}/>
+    )
+
   }
 }
 

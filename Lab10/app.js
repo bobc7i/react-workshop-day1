@@ -7,6 +7,9 @@ import Panel from 'react-bootstrap/lib/Panel';
 import Input from 'react-bootstrap/lib/Input';
 import Label from 'react-bootstrap/lib/Label';
 import Button from 'react-bootstrap/lib/Button';
+import Dispatcher from './dispatcher';
+
+var dispatcher = new Dispatcher();
 
 class LunchApp extends React.Component {
   render() {
@@ -57,8 +60,9 @@ class SelectedLunchPanel extends React.Component {
     this.updateInstructions = this.updateInstructions.bind(this);
     this.state = { instructions: '' };
   }
-  // fix me: Listen for a change from a dispatcher
-  // fix me: fire updateInstructions with the new data
+  componentDidMount() {
+    dispatcher.on('instructions', this.updateInstructions);
+  }
   updateInstructions(instructions) {
     this.setState({instructions: instructions});
   }
@@ -84,7 +88,7 @@ class SpecialInstructionsInput extends React.Component {
     this.handleChange = this.handleChange.bind(this);
   }
   handleChange() {
-    // fix me
+    dispatcher.trigger('instructions', this.refs.specialInstructionsInput.value);
   }
   render() {
     return (

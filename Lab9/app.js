@@ -6,6 +6,7 @@ import Jumbotron from 'react-bootstrap/lib/Jumbotron';
 import Panel from 'react-bootstrap/lib/Panel';
 import Input from 'react-bootstrap/lib/Input';
 import Label from 'react-bootstrap/lib/Label';
+import Button from 'react-bootstrap/lib/Button';
 
 class LunchApp extends React.Component {
   render() {
@@ -80,8 +81,8 @@ class SpecialInstructionsInput extends React.Component {
     super(props);
     this.handleChange = this.handleChange.bind(this);
   }
-  handleChange(e) {
-    this.props.updateInstructions(e.target.value);
+  handleChange() {
+    this.props.updateInstructions(this.refs.specialInstructionsInput.value);
   }
   render() {
     return (
@@ -89,9 +90,8 @@ class SpecialInstructionsInput extends React.Component {
         <Label>Enter special instructions:</Label>
       <input
         ref='specialInstructionsInput'
-        type='text'
-        value={this.props.value}
-        onChange={this.handleChange} />
+        type='text'/>
+      <Button onClick={this.handleChange}>Update</Button>
       </div>
     );
   }
