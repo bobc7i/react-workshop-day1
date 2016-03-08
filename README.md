@@ -12,4 +12,3 @@ React.js workshop. Self contained, one-day workshop covering the basics
 * cd Lab1/
 * npm start
 * open Chrome to http://localhost:8080/
-
